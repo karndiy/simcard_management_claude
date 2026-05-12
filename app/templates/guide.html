@@ -1,0 +1,505 @@
+{% extends "base.html" %}
+{% block title %}คู่มือการใช้งาน{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6" x-data="{ active: 'intro' }">
+
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white">
+    <div class="flex items-center gap-4">
+      <div style="width:52px;height:52px;background:rgba(255,255,255,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="1.8">
+          <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold">คู่มือการใช้งาน</h1>
+        <p class="text-blue-100 text-sm mt-0.5">SIM Card Management System — KarnDIY v1.0</p>
+      </div>
+    </div>
+    <!-- Quick stats -->
+    <div class="grid grid-cols-3 gap-3 mt-5">
+      <div style="background:rgba(255,255,255,0.12);border-radius:10px;padding:10px 14px;">
+        <div class="text-xs text-blue-200 mb-0.5">หัวข้อทั้งหมด</div>
+        <div class="text-xl font-bold">7 หัวข้อ</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.12);border-radius:10px;padding:10px 14px;">
+        <div class="text-xs text-blue-200 mb-0.5">Features</div>
+        <div class="text-xl font-bold">9 รายการ</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.12);border-radius:10px;padding:10px 14px;">
+        <div class="text-xs text-blue-200 mb-0.5">ระดับ</div>
+        <div class="text-xl font-bold">ผู้ใช้ทั่วไป</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-col lg:flex-row gap-5">
+
+    <!-- Left: Topic nav -->
+    <div class="lg:w-56 flex-shrink-0">
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden sticky top-4">
+        <div class="px-4 py-3 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">สารบัญ</div>
+        <nav class="p-2 space-y-0.5">
+          {% set menu = [
+            ('intro',    '🚀', 'เริ่มต้นใช้งาน'),
+            ('login',    '🔐', 'การเข้าสู่ระบบ'),
+            ('dashboard','📊', 'Dashboard'),
+            ('simcard',  '📱', 'จัดการ SIM Card'),
+            ('qr',       '📷', 'QR Code Scanner'),
+            ('notify',   '🔔', 'ระบบแจ้งเตือน'),
+            ('cost',     '💰', 'ติดตามค่าใช้จ่าย'),
+            ('export',   '📤', 'Export ข้อมูล'),
+            ('faq',      '❓', 'คำถามที่พบบ่อย'),
+          ] %}
+          {% for id, icon, label in menu %}
+          <button @click="active='{{ id }}'"
+                  :class="active==='{{ id }}' ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-600 hover:bg-slate-50'"
+                  class="w-full text-left flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all">
+            <span>{{ icon }}</span>{{ label }}
+          </button>
+          {% endfor %}
+        </nav>
+      </div>
+    </div>
+
+    <!-- Right: Content -->
+    <div class="flex-1 min-w-0">
+
+      <!-- ═══════════════════════════════════════════════
+           1. เริ่มต้นใช้งาน
+      ═══════════════════════════════════════════════ -->
+      <div x-show="active==='intro'" class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">
+        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">🚀 เริ่มต้นใช้งานระบบ</h2>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800">
+          <strong>ระบบ SIM Card Management</strong> ช่วยให้องค์กรจัดการ SIM Card ทั้งหมดในที่เดียว ครอบคลุมตั้งแต่การเพิ่มข้อมูล SIM, ติดตามการใช้งาน, แจ้งเตือนวันหมดอายุ ไปจนถึงรายงานค่าใช้จ่าย
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-slate-700 mb-3 text-sm">ขั้นตอนการเริ่มต้น (3 ขั้นตอน)</h3>
+          <div class="space-y-3">
+            <div class="flex gap-3 p-3 bg-slate-50 rounded-xl">
+              <div style="width:28px;height:28px;background:#2563eb;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;">1</div>
+              <div>
+                <div class="font-semibold text-sm text-slate-700">เข้าสู่ระบบ</div>
+                <div class="text-xs text-slate-500 mt-0.5">ใช้ Username: <code class="bg-slate-200 px-1 rounded font-mono">admin</code> / Password: <code class="bg-slate-200 px-1 rounded font-mono">admin1234</code> (ควรเปลี่ยนรหัสผ่านหลัง Login ครั้งแรก)</div>
+              </div>
+            </div>
+            <div class="flex gap-3 p-3 bg-slate-50 rounded-xl">
+              <div style="width:28px;height:28px;background:#2563eb;color:white;border-radius:50%;display:flex;align-items:center;justify-content:normal;font-weight:700;font-size:13px;flex-shrink:0;justify-content:center;">2</div>
+              <div>
+                <div class="font-semibold text-sm text-slate-700">เพิ่ม SIM Card แรก</div>
+                <div class="text-xs text-slate-500 mt-0.5">ไปที่ <strong>จัดการ SIM Card → เพิ่ม SIM ใหม่</strong> กรอกข้อมูลหรือสแกน QR Code</div>
+              </div>
+            </div>
+            <div class="flex gap-3 p-3 bg-slate-50 rounded-xl">
+              <div style="width:28px;height:28px;background:#2563eb;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;">3</div>
+              <div>
+                <div class="font-semibold text-sm text-slate-700">ตั้งค่าการแจ้งเตือน</div>
+                <div class="text-xs text-slate-500 mt-0.5">ไปที่ <strong>การแจ้งเตือน</strong> ตั้งค่า Email / Line Notify เพื่อรับการแจ้งเตือนอัตโนมัติ</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-slate-700 mb-3 text-sm">ข้อกำหนดของระบบ</h3>
+          <div class="grid grid-cols-2 gap-2 text-sm">
+            <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+              <div class="font-semibold text-emerald-700 text-xs mb-1">✅ รองรับ Browser</div>
+              <div class="text-emerald-600 text-xs">Chrome, Firefox, Safari, Edge (เวอร์ชันล่าสุด)</div>
+            </div>
+            <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+              <div class="font-semibold text-emerald-700 text-xs mb-1">✅ อุปกรณ์</div>
+              <div class="text-emerald-600 text-xs">PC, Tablet, Smartphone (Responsive)</div>
+            </div>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div class="font-semibold text-blue-700 text-xs mb-1">📷 QR Scanner</div>
+              <div class="text-blue-600 text-xs">ต้องใช้ HTTPS หรือ localhost + ให้สิทธิ์กล้อง</div>
+            </div>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div class="font-semibold text-blue-700 text-xs mb-1">🌐 Network</div>
+              <div class="text-blue-600 text-xs">ต้องมีการเชื่อมต่ออินเทอร์เน็ต (สำหรับ Line Notify)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════
+           2. Login
+      ═══════════════════════════════════════════════ -->
+      <div x-show="active==='login'" x-cloak class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">
+        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">🔐 การเข้าสู่ระบบ</h2>
+
+        <div class="space-y-4 text-sm text-slate-600">
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <div class="bg-slate-50 px-4 py-2.5 border-b border-slate-200 font-semibold text-xs text-slate-700 uppercase tracking-wide">วิธีเข้าสู่ระบบ</div>
+            <div class="p-4 space-y-2">
+              <div class="flex gap-2"><span class="text-blue-500 font-bold">①</span> เปิด Browser แล้วไปที่ URL ของระบบ</div>
+              <div class="flex gap-2"><span class="text-blue-500 font-bold">②</span> กรอก <strong>ชื่อผู้ใช้</strong> และ <strong>รหัสผ่าน</strong> ในช่องที่กำหนด</div>
+              <div class="flex gap-2"><span class="text-blue-500 font-bold">③</span> กดปุ่ม <strong>เข้าสู่ระบบ</strong> ระบบจะพาไปที่ Dashboard อัตโนมัติ</div>
+            </div>
+          </div>
+
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <div class="font-semibold text-amber-700 mb-2 text-xs uppercase tracking-wide">⚠️ บัญชีเริ่มต้น (ควรเปลี่ยนทันที)</div>
+            <div class="font-mono text-sm bg-amber-100 rounded-lg p-3 text-amber-800">
+              Username: admin<br/>Password: admin1234
+            </div>
+          </div>
+
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <div class="bg-slate-50 px-4 py-2.5 border-b border-slate-200 font-semibold text-xs text-slate-700 uppercase tracking-wide">สิทธิ์การใช้งาน (Role)</div>
+            <div class="divide-y divide-slate-100">
+              <div class="p-4 flex justify-between items-center">
+                <div><span class="font-semibold text-slate-800">Admin</span><div class="text-xs text-slate-500 mt-0.5">เข้าถึงทุกฟังก์ชัน: เพิ่ม/แก้ไข/ลบ SIM, ตั้งค่าระบบ, Export</div></div>
+                <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full">เต็มสิทธิ์</span>
+              </div>
+              <div class="p-4 flex justify-between items-center">
+                <div><span class="font-semibold text-slate-800">Viewer</span><div class="text-xs text-slate-500 mt-0.5">ดูข้อมูลได้อย่างเดียว ไม่สามารถแก้ไขหรือลบได้</div></div>
+                <span class="bg-slate-100 text-slate-600 text-xs font-bold px-2.5 py-1 rounded-full">อ่านอย่างเดียว</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-500">
+            💡 <strong>ออกจากระบบ:</strong> คลิกที่ไอคอน Logout ที่มุมล่างซ้ายของ Sidebar หรือที่ Header (บนมือถือ)
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════
+           3. Dashboard
+      ═══════════════════════════════════════════════ -->
+      <div x-show="active==='dashboard'" x-cloak class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">
+        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">📊 Dashboard</h2>
+
+        <div class="text-sm text-slate-600">
+          Dashboard คือหน้าแรกของระบบ แสดงภาพรวมสถานะ SIM Card ทั้งหมดในองค์กรแบบ Real-time
+        </div>
+
+        <div class="space-y-3">
+          <h3 class="font-semibold text-slate-700 text-sm">ส่วนประกอบของ Dashboard</h3>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="border border-slate-200 rounded-xl p-4">
+              <div class="text-lg mb-1">📈</div>
+              <div class="font-semibold text-sm text-slate-700">Stat Cards (4 การ์ด)</div>
+              <ul class="text-xs text-slate-500 mt-1.5 space-y-0.5">
+                <li>• SIM ทั้งหมดในระบบ</li>
+                <li>• SIM ที่ Active อยู่</li>
+                <li>• ค่าบริการรวม/เดือน (฿)</li>
+                <li>• SIM ที่ใกล้หมดอายุ (30 วัน)</li>
+              </ul>
+            </div>
+            <div class="border border-slate-200 rounded-xl p-4">
+              <div class="text-lg mb-1">📉</div>
+              <div class="font-semibold text-sm text-slate-700">กราฟ (2 รายการ)</div>
+              <ul class="text-xs text-slate-500 mt-1.5 space-y-0.5">
+                <li>• Donut Chart: สัดส่วนตามสถานะ</li>
+                <li>• Bar Chart: ค่าบริการตามผู้ให้บริการ</li>
+              </ul>
+            </div>
+            <div class="border border-slate-200 rounded-xl p-4">
+              <div class="text-lg mb-1">💰</div>
+              <div class="font-semibold text-sm text-slate-700">ตาราง Budget vs ค่าจริง</div>
+              <ul class="text-xs text-slate-500 mt-1.5 space-y-0.5">
+                <li>• แสดงค่าใช้จ่ายแต่ละแผนก</li>
+                <li>• เตือนเมื่อเกิน Budget (สีแดง)</li>
+              </ul>
+            </div>
+            <div class="border border-slate-200 rounded-xl p-4">
+              <div class="text-lg mb-1">⚠️</div>
+              <div class="font-semibold text-sm text-slate-700">แจ้งเตือนวันหมดอายุ</div>
+              <ul class="text-xs text-slate-500 mt-1.5 space-y-0.5">
+                <li>• สีเหลือง = หมดใน 8–30 วัน</li>
+                <li>• สีแดง = หมดใน 7 วัน หรือน้อยกว่า</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════
+           4. SIM Card Management
+      ═══════════════════════════════════════════════ -->
+      <div x-show="active==='simcard'" x-cloak class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">
+        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">📱 จัดการ SIM Card</h2>
+
+        <div class="space-y-4">
+
+          <!-- เพิ่ม -->
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <div class="bg-emerald-50 px-4 py-2.5 border-b border-slate-200 flex items-center gap-2">
+              <span class="text-sm">➕</span>
+              <span class="font-semibold text-sm text-emerald-800">เพิ่ม SIM ใหม่</span>
+            </div>
+            <div class="p-4 text-sm text-slate-600 space-y-2">
+              <p>กดปุ่ม <strong>+ เพิ่ม SIM ใหม่</strong> ที่มุมบนขวา หน้าฟอร์มจะมีช่องกรอกข้อมูลดังนี้:</p>
+              <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs bg-slate-50 rounded-lg p-3">
+                <div><span class="text-red-500">*</span> <strong>ICCID</strong> — รหัส SIM 20 หลัก</div>
+                <div><span class="text-red-500">*</span> <strong>เบอร์โทร</strong> — หมายเลขโทรศัพท์</div>
+                <div><span class="text-red-500">*</span> <strong>ผู้ให้บริการ</strong> — AIS/DTAC/TRUE ฯลฯ</div>
+                <div><strong>สถานะ</strong> — Active/Inactive/Suspended</div>
+                <div><strong>แพ็กเกจ</strong> — ชื่อแพ็กเกจ</div>
+                <div><strong>ผู้ใช้งาน</strong> — ชื่อพนักงาน</div>
+                <div><strong>แผนก</strong> — แผนกที่ใช้งาน</div>
+                <div><strong>ค่าบริการ/เดือน</strong> — ราคาเป็นบาท</div>
+                <div><strong>วันเปิดใช้</strong> — วันที่เริ่มใช้งาน</div>
+                <div><strong>วันหมดอายุ</strong> — วันที่ SIM หมดอายุ</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ค้นหา -->
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <div class="bg-blue-50 px-4 py-2.5 border-b border-slate-200 flex items-center gap-2">
+              <span class="text-sm">🔍</span>
+              <span class="font-semibold text-sm text-blue-800">ค้นหาและกรองข้อมูล</span>
+            </div>
+            <div class="p-4 text-sm text-slate-600 space-y-2">
+              <p>ระบบรองรับการค้นหาแบบหลายเงื่อนไขพร้อมกัน:</p>
+              <ul class="space-y-1.5 text-xs">
+                <li class="flex gap-2"><span class="text-blue-500">🔎</span><span><strong>ช่องค้นหา:</strong> พิมพ์ ICCID, เบอร์โทร, หรือชื่อผู้ใช้งาน</span></li>
+                <li class="flex gap-2"><span class="text-blue-500">🔎</span><span><strong>สถานะ:</strong> กรองตาม Active/Inactive/Suspended/Expired</span></li>
+                <li class="flex gap-2"><span class="text-blue-500">🔎</span><span><strong>ผู้ให้บริการ:</strong> กรองตาม Network Provider</span></li>
+                <li class="flex gap-2"><span class="text-blue-500">🔎</span><span><strong>แผนก:</strong> กรองดู SIM ของแผนกใดแผนกหนึ่ง</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Status badges -->
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <div class="bg-slate-50 px-4 py-2.5 border-b border-slate-200 font-semibold text-xs text-slate-700 uppercase tracking-wide">ความหมายของสถานะ</div>
+            <div class="p-4 space-y-2">
+              <div class="flex items-center gap-3 text-sm">
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold status-active">active</span>
+                <span class="text-slate-600">SIM กำลังใช้งานอยู่ปกติ</span>
+              </div>
+              <div class="flex items-center gap-3 text-sm">
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold status-inactive">inactive</span>
+                <span class="text-slate-600">SIM ไม่ได้ใช้งาน (เก็บสำรองไว้)</span>
+              </div>
+              <div class="flex items-center gap-3 text-sm">
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold status-suspended">suspended</span>
+                <span class="text-slate-600">SIM ถูกระงับการใช้งานชั่วคราว</span>
+              </div>
+              <div class="flex items-center gap-3 text-sm">
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold status-expired">expired</span>
+                <span class="text-slate-600">SIM หมดอายุแล้ว</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════
+           5. QR Code
+      ═══════════════════════════════════════════════ -->
+      <div x-show="active==='qr'" x-cloak class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">
+        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">📷 QR Code Scanner & Generator</h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="border border-violet-200 bg-violet-50 rounded-xl p-4">
+            <div class="text-2xl mb-2">📷</div>
+            <h3 class="font-semibold text-violet-800 text-sm mb-2">QR Scanner (สแกน)</h3>
+            <ol class="text-xs text-violet-700 space-y-1.5">
+              <li><strong>①</strong> กดปุ่ม <strong>+ เพิ่ม SIM ใหม่</strong></li>
+              <li><strong>②</strong> กดปุ่ม <strong>📷 เปิดกล้อง</strong> ในกล่องสีม่วง</li>
+              <li><strong>③</strong> Browser จะขอสิทธิ์กล้อง — กด <strong>Allow/อนุญาต</strong></li>
+              <li><strong>④</strong> นำ SIM Card มาให้กล้องสแกน Barcode/QR</li>
+              <li><strong>⑤</strong> ระบบจะดึง ICCID ออกมาให้อัตโนมัติ</li>
+              <li><strong>⑥</strong> กด <strong>✓ ใช้งาน</strong> เพื่อกรอก ICCID ลงฟอร์ม</li>
+            </ol>
+          </div>
+          <div class="border border-blue-200 bg-blue-50 rounded-xl p-4">
+            <div class="text-2xl mb-2">🖨️</div>
+            <h3 class="font-semibold text-blue-800 text-sm mb-2">QR Generator (สร้าง)</h3>
+            <ol class="text-xs text-blue-700 space-y-1.5">
+              <li><strong>①</strong> ไปที่หน้า <strong>จัดการ SIM Card</strong></li>
+              <li><strong>②</strong> หา SIM ที่ต้องการในตาราง</li>
+              <li><strong>③</strong> กดปุ่ม <strong>QR</strong> ในคอลัมน์ Actions</li>
+              <li><strong>④</strong> Browser จะเปิดรูป QR Code</li>
+              <li><strong>⑤</strong> Click ขวา → <strong>Save Image</strong> เพื่อบันทึก</li>
+              <li><strong>⑥</strong> นำไปพิมพ์ติด Label บน SIM/อุปกรณ์</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-700">
+          ⚠️ <strong>ข้อควรระวัง:</strong> QR Scanner ต้องการการเชื่อมต่อผ่าน <strong>HTTPS</strong> หรือ <strong>localhost</strong> เท่านั้น หากใช้งานผ่าน HTTP บน Server จริง กล้องจะไม่ทำงาน ให้ติดตั้ง SSL Certificate ก่อน
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════
+           6. การแจ้งเตือน
+      ═══════════════════════════════════════════════ -->
+      <div x-show="active==='notify'" x-cloak class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">
+        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">🔔 ระบบแจ้งเตือน</h2>
+
+        <div class="text-sm text-slate-600">ระบบตรวจสอบวันหมดอายุของ SIM ทุกวันเวลา 08:00 น. และส่งแจ้งเตือนอัตโนมัติผ่าน 2 ช่องทาง</div>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <div class="bg-red-50 px-4 py-2.5 border-b border-slate-200 font-semibold text-sm text-red-700">📧 Email Notification</div>
+            <div class="p-4 text-xs text-slate-600 space-y-2">
+              <p><strong>วิธีตั้งค่า</strong> (แก้ไขไฟล์ <code class="bg-slate-100 px-1 rounded">.env</code>):</p>
+              <pre class="bg-slate-900 text-green-400 rounded-lg p-3 text-xs overflow-x-auto">SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your@gmail.com
+SMTP_PASSWORD=app-password
+NOTIFY_EMAIL=admin@company.com</pre>
+              <p class="text-slate-500">💡 Gmail ต้องเปิด <strong>2-Step Verification</strong> และสร้าง <strong>App Password</strong> ก่อน</p>
+            </div>
+          </div>
+
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <div class="bg-green-50 px-4 py-2.5 border-b border-slate-200 font-semibold text-sm text-green-700">💬 Line Notify</div>
+            <div class="p-4 text-xs text-slate-600 space-y-2">
+              <p><strong>วิธีสร้าง Line Notify Token:</strong></p>
+              <ol class="space-y-1 text-slate-600">
+                <li><strong>①</strong> ไปที่ <a href="https://notify-bot.line.me" target="_blank" class="text-blue-600 underline">notify-bot.line.me</a></li>
+                <li><strong>②</strong> Login ด้วย LINE Account</li>
+                <li><strong>③</strong> กด <strong>Generate Token</strong></li>
+                <li><strong>④</strong> เลือก Group หรือ Personal</li>
+                <li><strong>⑤</strong> Copy Token ไปใส่ใน <code class="bg-slate-100 px-1 rounded">.env</code></li>
+              </ol>
+              <pre class="bg-slate-900 text-green-400 rounded-lg p-3 text-xs">LINE_NOTIFY_TOKEN=xxxxx</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <div class="bg-slate-50 px-4 py-2.5 border-b border-slate-200 font-semibold text-xs text-slate-700 uppercase tracking-wide">เงื่อนไขการแจ้งเตือน</div>
+          <div class="p-4 text-sm">
+            <div class="text-slate-600 mb-3">แจ้งเตือนล่วงหน้าตาม <code class="bg-slate-100 px-1 rounded font-mono">ALERT_DAYS_BEFORE</code> ในไฟล์ .env (ค่าเริ่มต้น: 7, 14, 30 วัน)</div>
+            <div class="flex gap-2 flex-wrap">
+              <span class="bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-xs font-semibold">🔴 7 วัน — Critical</span>
+              <span class="bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg text-xs font-semibold">🟡 14 วัน — Warning</span>
+              <span class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-semibold">🔵 30 วัน — Reminder</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════
+           7. Cost Tracking
+      ═══════════════════════════════════════════════ -->
+      <div x-show="active==='cost'" x-cloak class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">
+        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">💰 ติดตามค่าใช้จ่าย & Budget</h2>
+
+        <div class="text-sm text-slate-600">ระบบคำนวณค่าใช้จ่าย SIM รายเดือน แยกตามแผนก และเปรียบเทียบกับ Budget ที่ตั้งไว้</div>
+
+        <div class="space-y-3 text-sm">
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+            <h3 class="font-semibold text-slate-700 mb-3 text-xs uppercase tracking-wide">วิธีดูรายงานค่าใช้จ่าย</h3>
+            <ol class="space-y-2 text-slate-600 text-sm">
+              <li class="flex gap-2"><span class="text-blue-500 font-bold">①</span> ไปที่หน้า <strong>Dashboard</strong></li>
+              <li class="flex gap-2"><span class="text-blue-500 font-bold">②</span> ดูส่วน <strong>กราฟค่าบริการตามผู้ให้บริการ</strong> (Bar Chart)</li>
+              <li class="flex gap-2"><span class="text-blue-500 font-bold">③</span> ดูส่วน <strong>ตารางค่าใช้จ่ายตามแผนก vs Budget</strong></li>
+              <li class="flex gap-2"><span class="text-blue-500 font-bold">④</span> แถวสีแดง = แผนกที่ค่าใช้จ่ายเกิน Budget</li>
+            </ol>
+          </div>
+
+          <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+            <h3 class="font-semibold text-emerald-700 mb-2 text-sm">วิธีตั้ง Budget ให้แต่ละแผนก</h3>
+            <p class="text-emerald-700 text-xs">ปัจจุบัน Budget ถูกจัดการผ่านตาราง <code class="bg-emerald-100 px-1 rounded font-mono">budgets</code> ใน Database โดยตรง (สามารถเพิ่ม UI ตั้งค่า Budget ได้ในเวอร์ชันถัดไป)</p>
+          </div>
+
+          <div class="border border-slate-200 rounded-xl p-4">
+            <h3 class="font-semibold text-slate-700 mb-2 text-sm">ฟิลด์ที่เกี่ยวกับค่าใช้จ่าย</h3>
+            <div class="grid grid-cols-2 gap-2 text-xs text-slate-600">
+              <div class="bg-slate-50 rounded-lg p-2.5"><strong>monthly_cost</strong><br/>ค่าบริการ SIM แต่ละใบ/เดือน</div>
+              <div class="bg-slate-50 rounded-lg p-2.5"><strong>department</strong><br/>แผนกที่รับผิดชอบค่าใช้จ่าย</div>
+              <div class="bg-slate-50 rounded-lg p-2.5"><strong>total monthly</strong><br/>ผลรวม active SIM ทั้งหมด</div>
+              <div class="bg-slate-50 rounded-lg p-2.5"><strong>budget vs actual</strong><br/>เปรียบเทียบแผนก vs งบประมาณ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════
+           8. Export
+      ═══════════════════════════════════════════════ -->
+      <div x-show="active==='export'" x-cloak class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">
+        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">📤 Export ข้อมูล</h2>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="border border-emerald-200 rounded-xl overflow-hidden">
+            <div class="bg-emerald-50 px-4 py-3 flex items-center gap-2">
+              <span>📄</span><span class="font-semibold text-emerald-800 text-sm">Export CSV</span>
+            </div>
+            <div class="p-4 text-xs text-slate-600 space-y-2">
+              <p>ส่งออกข้อมูลเป็นไฟล์ <strong>.csv</strong> รองรับการเปิดด้วย Excel, Google Sheets</p>
+              <p><strong>วิธีใช้:</strong></p>
+              <ol class="space-y-1">
+                <li>① กรองข้อมูลที่ต้องการก่อน (ถ้ามี)</li>
+                <li>② กดปุ่ม <strong>📄 Export CSV</strong> ในหน้า SIM List หรือ Sidebar</li>
+                <li>③ ไฟล์จะดาวน์โหลดอัตโนมัติ</li>
+              </ol>
+              <p class="text-slate-400">Encoding: UTF-8 BOM (รองรับภาษาไทย)</p>
+            </div>
+          </div>
+          <div class="border border-blue-200 rounded-xl overflow-hidden">
+            <div class="bg-blue-50 px-4 py-3 flex items-center gap-2">
+              <span>📊</span><span class="font-semibold text-blue-800 text-sm">Export Excel</span>
+            </div>
+            <div class="p-4 text-xs text-slate-600 space-y-2">
+              <p>ส่งออกข้อมูลเป็นไฟล์ <strong>.xlsx</strong> พร้อม Header สีน้ำเงิน, ปรับความกว้างคอลัมน์อัตโนมัติ</p>
+              <p><strong>คอลัมน์ที่ได้:</strong></p>
+              <div class="bg-slate-50 rounded-lg p-2 font-mono text-xs text-slate-500 leading-relaxed">
+                ICCID | เบอร์โทร | ผู้ให้บริการ<br/>
+                สถานะ | แพ็กเกจ | ผู้ใช้งาน<br/>
+                แผนก | วันเปิดใช้ | วันหมดอายุ<br/>
+                ค่าบริการ | หมายเหตุ
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-xs text-blue-700">
+          💡 <strong>Tip:</strong> สามารถกรองข้อมูลก่อน Export ได้ เช่น Export เฉพาะ SIM ของแผนก IT, หรือเฉพาะ SIM ที่ Active อยู่
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════
+           9. FAQ
+      ═══════════════════════════════════════════════ -->
+      <div x-show="active==='faq'" x-cloak class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4" x-data="{ open: null }">
+        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">❓ คำถามที่พบบ่อย (FAQ)</h2>
+
+        {% set faqs = [
+          ('เพิ่ม SIM แล้วไม่ปรากฏในรายการ?', 'ลอง Refresh หน้าเว็บ หรือตรวจสอบว่า Filter การค้นหาถูกตั้งไว้หรือไม่ กด ✕ เพื่อล้าง Filter ทั้งหมด'),
+          ('ระบบแจ้งเตือน Email ไม่ทำงาน?', 'ตรวจสอบว่ากรอก SMTP_USER, SMTP_PASSWORD, และ NOTIFY_EMAIL ในไฟล์ .env ครบถ้วนแล้ว หากใช้ Gmail ต้องสร้าง App Password (ไม่ใช้รหัสผ่านปกติ)'),
+          ('กล้อง QR Scanner ไม่เปิด?', 'QR Scanner ต้องใช้งานผ่าน HTTPS หรือ localhost เท่านั้น นอกจากนี้ต้องอนุญาตให้ Browser เข้าถึงกล้องด้วย'),
+          ('Export Excel แล้วภาษาไทยเป็น ????', 'ให้เปิดไฟล์ด้วย Excel แล้วเลือก Encoding เป็น UTF-8 หรือลองใช้ Google Sheets แทน ซึ่งรองรับ UTF-8 โดยอัตโนมัติ'),
+          ('จะ Deploy ขึ้น Server จริงทำอย่างไร?', 'รองรับการ Deploy บน Railway โดยสร้างโปรเจกต์ใน railway.app เชื่อม GitHub Repository แล้วตั้งค่า Environment Variables ตาม .env.example'),
+          ('ลืมรหัสผ่าน Admin ทำอย่างไร?', 'ให้ใช้คำสั่ง Python รัน script เพื่อ Reset รหัสผ่านโดยตรงใน Database หรือลบไฟล์ simcard.db แล้วรันระบบใหม่ (ข้อมูลจะหายทั้งหมด)'),
+          ('รองรับ SIM กี่ใบในระบบ?', 'ไม่จำกัดจำนวน ขึ้นอยู่กับพื้นที่ดิสก์ของเซิร์ฟเวอร์ SQLite รองรับข้อมูลหลักล้านแถว สำหรับองค์กรขนาดใหญ่แนะนำเปลี่ยนเป็น PostgreSQL'),
+        ] %}
+
+        {% for q, a in faqs %}
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <button @click="open === {{ loop.index }} ? open = null : open = {{ loop.index }}"
+                  class="w-full flex items-center justify-between px-4 py-3.5 text-left hover:bg-slate-50 transition">
+            <span class="font-semibold text-sm text-slate-700">{{ q }}</span>
+            <svg class="w-4 h-4 text-slate-400 flex-shrink-0 transition-transform"
+                 :class="open === {{ loop.index }} ? 'rotate-180' : ''"
+                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div x-show="open === {{ loop.index }}" x-cloak
+               class="px-4 pb-4 text-sm text-slate-600 bg-slate-50 border-t border-slate-100">
+            <p class="pt-3">{{ a }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+    </div><!-- end right content -->
+  </div>
+</div>
+{% endblock %}

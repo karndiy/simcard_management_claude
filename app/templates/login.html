@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>เข้าสู่ระบบ — SIM Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="h-full bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
+  <div class="w-full max-w-sm">
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <div class="inline-flex w-16 h-16 bg-blue-600 rounded-2xl items-center justify-center text-white text-3xl font-bold shadow-lg mb-4">S</div>
+      <h1 class="text-white text-2xl font-bold">SIM Card Management</h1>
+      <p class="text-slate-400 text-sm mt-1">KarnDIY Organization</p>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-white rounded-2xl shadow-2xl p-8">
+      <h2 class="text-slate-800 text-lg font-semibold mb-6">เข้าสู่ระบบ</h2>
+
+      {% if error %}
+      <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-5 flex items-center gap-2">
+        <span>⚠️</span> {{ error }}
+      </div>
+      {% endif %}
+
+      <form method="post" action="/login" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">ชื่อผู้ใช้</label>
+          <input type="text" name="username" required autocomplete="username"
+                 class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                 placeholder="admin"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">รหัสผ่าน</label>
+          <input type="password" name="password" required autocomplete="current-password"
+                 class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                 placeholder="••••••••"/>
+        </div>
+        <button type="submit"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition text-sm mt-2">
+          เข้าสู่ระบบ
+        </button>
+      </form>
+
+      <p class="text-center text-slate-400 text-xs mt-6">
+        Default: <span class="font-mono font-semibold text-slate-600">admin / admin1234</span>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

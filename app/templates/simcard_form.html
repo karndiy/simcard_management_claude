@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+{% block title %}{% if sim %}แก้ไข SIM{% else %}เพิ่ม SIM ใหม่{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-5" x-data="qrScanner()">
+  <!-- Header -->
+  <div class="flex items-center gap-4">
+    <a href="/simcards" class="text-slate-400 hover:text-slate-700 transition">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">{% if sim %}✏️ แก้ไข SIM Card{% else %}➕ เพิ่ม SIM Card ใหม่{% endif %}</h1>
+    </div>
+  </div>
+
+  {% if error %}
+  <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 flex items-center gap-2">
+    ⚠️ {{ error }}
+  </div>
+  {% endif %}
+
+  <!-- QR Scanner (New SIM only) -->
+  {% if not sim %}
+  <div class="bg-gradient-to-r from-violet-50 to-blue-50 border border-violet-200 rounded-xl p-5">
+    <div class="flex items-center justify-between mb-3">
+      <div>
+        <h3 class="font-semibold text-violet-800 text-sm">📷 สแกน QR Code / Barcode จาก SIM Card</h3>
+        <p class="text-violet-600 text-xs mt-0.5">ใช้กล้องสแกน ICCID อัตโนมัติ ไม่ต้องพิมพ์เอง</p>
+      </div>
+      <button type="button" @click="toggleScanner()"
+              class="bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition">
+        <span x-text="scanning ? '⏹ หยุดสแกน' : '📷 เปิดกล้อง'">📷 เปิดกล้อง</span>
+      </button>
+    </div>
+
+    <!-- Camera view -->
+    <div x-show="scanning" x-cloak class="mt-3">
+      <div class="relative bg-black rounded-xl overflow-hidden" style="max-width:400px; margin:0 auto;">
+        <video id="qr-video" class="w-full rounded-xl" autoplay playsinline></video>
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div class="w-48 h-48 border-4 border-violet-400 rounded-xl opacity-70"></div>
+        </div>
+      </div>
+      <p class="text-center text-violet-600 text-xs mt-2">วาง QR Code หรือ Barcode ของ SIM ในกรอบ</p>
+    </div>
+
+    <!-- Scan result -->
+    <div x-show="scannedICCID" x-cloak class="mt-3 bg-white border border-violet-300 rounded-lg px-4 py-3 flex items-center justify-between">
+      <div>
+        <span class="text-xs text-violet-500 font-semibold">ICCID ที่สแกนได้:</span>
+        <span class="ml-2 font-mono font-bold text-violet-800" x-text="scannedICCID"></span>
+      </div>
+      <button type="button" @click="applyICCID()"
+              class="bg-violet-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-violet-700">
+        ✓ ใช้งาน
+      </button>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Form -->
+  <form method="post" action="{% if sim %}/simcards/{{ sim.id }}/edit{% else %}/simcards/new{% endif %}"
+        class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
+
+    <!-- ICCID (read-only when editing) -->
+    {% if not sim %}
+    <div>
+      <label class="block text-sm font-semibold text-slate-700 mb-1.5">
+        ICCID <span class="text-red-500">*</span>
+        <span class="text-slate-400 font-normal ml-1 text-xs">(20 หลัก บนตัว SIM Card)</span>
+      </label>
+      <input type="text" name="iccid" id="iccid-input" required maxlength="22"
+             class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+             placeholder="89660000000000000000"/>
+    </div>
+    {% endif %}
+
+    <!-- Row 1 -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">เบอร์โทรศัพท์ <span class="text-red-500">*</span></label>
+        <input type="text" name="phone_number" required
+               value="{{ sim.phone_number if sim else '' }}"
+               class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+               placeholder="08x-xxx-xxxx"/>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">ผู้ให้บริการ <span class="text-red-500">*</span></label>
+        <select name="carrier" required
+                class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          {% for c in carriers %}
+          <option value="{{ c }}" {% if sim and sim.carrier == c %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <!-- Row 2 -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">สถานะ</label>
+        <select name="status"
+                class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          {% for s in statuses %}
+          <option value="{{ s }}" {% if sim and sim.status == s %}selected{% elif not sim and s == 'active' %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">แพ็กเกจ / แผนบริการ</label>
+        <input type="text" name="plan" value="{{ sim.plan if sim else '' }}"
+               class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+               placeholder="เช่น Unlimited 5G 299 บาท"/>
+      </div>
+    </div>
+
+    <!-- Row 3 -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">ผู้ใช้งาน</label>
+        <input type="text" name="assigned_to" value="{{ sim.assigned_to if sim else '' }}"
+               class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+               placeholder="ชื่อพนักงาน"/>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">แผนก</label>
+        <select name="department"
+                class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">— เลือกแผนก —</option>
+          {% for d in departments %}
+          <option value="{{ d }}" {% if sim and sim.department == d %}selected{% endif %}>{{ d }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <!-- Row 4 — Dates -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">วันเปิดใช้งาน</label>
+        <input type="date" name="activation_date"
+               value="{{ sim.activation_date if sim else '' }}"
+               class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">วันหมดอายุ</label>
+        <input type="date" name="expiry_date"
+               value="{{ sim.expiry_date if sim else '' }}"
+               class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">ค่าบริการ/เดือน (฿)</label>
+        <input type="number" name="monthly_cost" min="0" step="0.01"
+               value="{{ sim.monthly_cost|float if sim else '0' }}"
+               class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+               placeholder="0.00"/>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div>
+      <label class="block text-sm font-semibold text-slate-700 mb-1.5">หมายเหตุ</label>
+      <textarea name="notes" rows="3"
+                class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                placeholder="ข้อมูลเพิ่มเติม...">{{ sim.notes if sim else '' }}</textarea>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="flex gap-3 pt-2">
+      <button type="submit"
+              class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-2.5 rounded-lg transition text-sm">
+        {% if sim %}💾 บันทึกการแก้ไข{% else %}✅ เพิ่ม SIM Card{% endif %}
+      </button>
+      <a href="/simcards"
+         class="flex-1 sm:flex-none text-center border border-slate-200 text-slate-600 font-semibold px-6 py-2.5 rounded-lg hover:bg-slate-50 transition text-sm">
+        ยกเลิก
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- jsQR for QR scanning -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script>
+function qrScanner() {
+  return {
+    scanning: false,
+    scannedICCID: '',
+    stream: null,
+    animFrame: null,
+
+    async toggleScanner() {
+      if (this.scanning) {
+        this.stopScanner();
+      } else {
+        await this.startScanner();
+      }
+    },
+
+    async startScanner() {
+      try {
+        this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        const video = document.getElementById('qr-video');
+        video.srcObject = this.stream;
+        this.scanning = true;
+        this.scanLoop(video);
+      } catch (e) {
+        alert('ไม่สามารถเข้าถึงกล้องได้: ' + e.message);
+      }
+    },
+
+    scanLoop(video) {
+      const canvas = document.createElement('canvas');
+      const ctx    = canvas.getContext('2d');
+      const tick   = () => {
+        if (!this.scanning) return;
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          canvas.width  = video.videoWidth;
+          canvas.height = video.videoHeight;
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code    = jsQR(imgData.data, imgData.width, imgData.height);
+          if (code) {
+            // Extract ICCID from data (supports raw ICCID or format: ICCID:xxx|...)
+            let raw = code.data;
+            const match = raw.match(/ICCID[:\s]?([0-9]{15,22})/i);
+            this.scannedICCID = match ? match[1] : raw.replace(/\D/g, '').slice(0, 20);
+            this.stopScanner();
+            return;
+          }
+        }
+        this.animFrame = requestAnimationFrame(tick);
+      };
+      this.animFrame = requestAnimationFrame(tick);
+    },
+
+    stopScanner() {
+      this.scanning = false;
+      if (this.animFrame) cancelAnimationFrame(this.animFrame);
+      if (this.stream) {
+        this.stream.getTracks().forEach(t => t.stop());
+        this.stream = null;
+      }
+    },
+
+    applyICCID() {
+      const input = document.getElementById('iccid-input');
+      if (input) { input.value = this.scannedICCID; }
+      this.scannedICCID = '';
+    }
+  };
+}
+</script>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}การแจ้งเตือน{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-800">🔔 ระบบแจ้งเตือน</h1>
+    <p class="text-slate-500 text-sm mt-0.5">ตั้งค่าการแจ้งเตือน Email & Line Notify สำหรับ SIM ที่ใกล้หมดอายุ</p>
+  </div>
+
+  {% if success %}
+  <div class="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-lg px-4 py-3 flex items-center gap-2">
+    ✅ {{ success }}
+  </div>
+  {% endif %}
+
+  <!-- How it works -->
+  <div class="bg-blue-50 border border-blue-200 rounded-xl p-5">
+    <h3 class="font-semibold text-blue-800 mb-3 text-sm">⚙️ วิธีการทำงาน</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-blue-700">
+      <div class="flex items-start gap-2">
+        <span class="text-lg">⏰</span>
+        <div><strong>ตรวจสอบอัตโนมัติ</strong><br/>ทุกวัน เวลา 08:00 น.</div>
+      </div>
+      <div class="flex items-start gap-2">
+        <span class="text-lg">📧</span>
+        <div><strong>Email Notification</strong><br/>ส่งผ่าน SMTP ที่ตั้งค่าไว้</div>
+      </div>
+      <div class="flex items-start gap-2">
+        <span class="text-lg">💬</span>
+        <div><strong>Line Notify</strong><br/>แจ้งเตือนผ่าน LINE ทันที</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Current settings (from .env) -->
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+    <h3 class="font-semibold text-slate-700 mb-4 text-sm">📋 การตั้งค่าปัจจุบัน (.env)</h3>
+    <div class="space-y-3">
+      <div class="grid grid-cols-2 gap-2 text-sm">
+        <span class="text-slate-500">SMTP Host:</span>
+        <span class="font-mono text-slate-800">{{ settings.smtp_host or '— ยังไม่ได้ตั้งค่า' }}</span>
+        <span class="text-slate-500">Email แจ้งเตือน:</span>
+        <span class="font-mono text-slate-800">{{ settings.notify_email or '— ยังไม่ได้ตั้งค่า' }}</span>
+        <span class="text-slate-500">Line Notify Token:</span>
+        <span class="font-mono text-slate-800">
+          {% if settings.line_token %}
+            {{ settings.line_token[:8] }}••••••••
+          {% else %}— ยังไม่ได้ตั้งค่า{% endif %}
+        </span>
+        <span class="text-slate-500">แจ้งเตือนล่วงหน้า:</span>
+        <span class="font-mono text-slate-800">{{ settings.alert_days }} วัน</span>
+      </div>
+    </div>
+    <div class="mt-4 bg-slate-50 rounded-lg p-3 text-xs text-slate-500">
+      💡 แก้ไขค่าตั้งต้นได้ในไฟล์ <code class="font-mono bg-slate-200 px-1 rounded">.env</code> แล้ว restart server
+    </div>
+  </div>
+
+  <!-- Manual trigger -->
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+    <h3 class="font-semibold text-slate-700 mb-2 text-sm">🚀 ส่งการแจ้งเตือนทันที</h3>
+    <p class="text-slate-500 text-xs mb-4">กดปุ่มเพื่อตรวจสอบและส่งการแจ้งเตือน SIM ที่ใกล้หมดอายุทันที (ไม่ต้องรอ 08:00)</p>
+    <form method="post" action="/notifications/send-now">
+      <button type="submit"
+              class="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-6 py-2.5 rounded-lg transition text-sm flex items-center gap-2">
+        🔔 ส่งการแจ้งเตือนเดี๋ยวนี้
+      </button>
+    </form>
+  </div>
+
+  <!-- Expiring SIMs list -->
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+      <h3 class="font-semibold text-slate-700 text-sm">⚠️ SIM ที่ต้องแจ้งเตือน (ภายใน 30 วัน)</h3>
+      <span class="bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-1 rounded-full">
+        {{ expiring|length }} รายการ
+      </span>
+    </div>
+    {% if expiring %}
+    <div class="divide-y divide-slate-100">
+      {% for sim in expiring %}
+      <div class="px-6 py-3 flex items-center justify-between hover:bg-slate-50">
+        <div>
+          <span class="font-semibold text-slate-800 text-sm">{{ sim.phone_number }}</span>
+          <span class="text-slate-400 text-xs ml-2">{{ sim.carrier }}</span>
+          {% if sim.assigned_to %}
+          <div class="text-slate-500 text-xs mt-0.5">{{ sim.assigned_to }}{% if sim.department %} — {{ sim.department }}{% endif %}</div>
+          {% endif %}
+        </div>
+        <div class="text-right">
+          <div class="text-sm font-bold {% if sim.days_until_expiry <= 7 %}text-red-600{% else %}text-amber-600{% endif %}">
+            อีก {{ sim.days_until_expiry }} วัน
+          </div>
+          <div class="text-slate-400 text-xs">{{ sim.expiry_date }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="px-6 py-10 text-center text-slate-400">
+      <div class="text-3xl mb-2">🎉</div>
+      <div class="font-medium text-sm">ไม่มี SIM ที่ใกล้หมดอายุในช่วง 30 วันนี้</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

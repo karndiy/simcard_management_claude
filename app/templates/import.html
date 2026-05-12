@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+{% block title %}Import SIM Card{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-5">
+
+  <!-- Header -->
+  <div class="flex items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">📥 Import SIM Card จาก Excel</h1>
+      <p class="text-slate-500 text-sm mt-0.5">รองรับไฟล์ .xlsx และ .xls — ดูตัวอย่างก่อน Import จริง</p>
+    </div>
+  </div>
+
+  <!-- Result box (after import) -->
+  {% if result %}
+  <div class="bg-emerald-50 border border-emerald-300 rounded-2xl p-6">
+    <h2 class="text-lg font-bold text-emerald-700 mb-4 flex items-center gap-2">🎉 Import สำเร็จ!</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div class="bg-white border border-emerald-200 rounded-xl p-4 text-center">
+        <div class="text-3xl font-bold text-emerald-600">{{ result.imported }}</div>
+        <div class="text-xs text-slate-500 mt-1 font-semibold">เพิ่มใหม่</div>
+      </div>
+      <div class="bg-white border border-blue-200 rounded-xl p-4 text-center">
+        <div class="text-3xl font-bold text-blue-600">{{ result.updated }}</div>
+        <div class="text-xs text-slate-500 mt-1 font-semibold">อัปเดต</div>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-4 text-center">
+        <div class="text-3xl font-bold text-slate-400">{{ result.skipped }}</div>
+        <div class="text-xs text-slate-500 mt-1 font-semibold">ข้าม</div>
+      </div>
+      <div class="bg-white border border-red-200 rounded-xl p-4 text-center">
+        <div class="text-3xl font-bold text-red-500">{{ result.errors }}</div>
+        <div class="text-xs text-slate-500 mt-1 font-semibold">ผิดพลาด</div>
+      </div>
+    </div>
+    <div class="flex gap-3 mt-5">
+      <a href="/simcards" class="bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+        📱 ดูรายการ SIM ทั้งหมด →
+      </a>
+      <a href="/import" class="border border-slate-200 text-slate-600 font-semibold px-5 py-2 rounded-lg text-sm hover:bg-slate-50 transition">
+        📥 Import อีกครั้ง
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Error -->
+  {% if error %}
+  <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm flex items-center gap-2">
+    ⚠️ {{ error }}
+  </div>
+  {% endif %}
+
+  <!-- Upload form (show when no preview) -->
+  {% if not preview and not result %}
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <!-- Format guide -->
+    <div class="bg-slate-50 border-b border-slate-200 px-6 py-4">
+      <h3 class="font-semibold text-slate-700 text-sm mb-3">📋 รูปแบบ Column ที่รองรับ</h3>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+        {% set cols = [
+          ('no','ลำดับ','ข้าม'),
+          ('station','สถานี/แผนก','department'),
+          ('project','โปรเจกต์','notes'),
+          ('network','ผู้ให้บริการ','carrier'),
+          ('type','ประเภท SIM','plan'),
+          ('number','เบอร์โทร','phone_number'),
+          ('s/n','Serial No.','iccid'),
+          ('package','แพ็กเกจ','plan'),
+          ('hardware','อุปกรณ์','notes'),
+          ('start','วันเปิดใช้','activation_date'),
+          ('exp','วันหมดอายุ','expiry_date'),
+          ('time_left','เวลาคงเหลือ','ข้าม'),
+          ('postion','ตำแหน่ง','assigned_to'),
+          ('remark','หมายเหตุ','notes'),
+        ] %}
+        {% for col, thai, maps_to in cols %}
+        <div class="bg-white border border-slate-200 rounded-lg p-2">
+          <div class="font-mono font-bold text-indigo-700 text-xs">{{ col }}</div>
+          <div class="text-slate-500 text-xs mt-0.5">{{ thai }}</div>
+          <div class="text-emerald-600 text-xs font-semibold">→ {{ maps_to }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Drop zone -->
+    <div class="p-6">
+      <form method="post" action="/import/preview" enctype="multipart/form-data" id="uploadForm">
+        <div class="border-2 border-dashed border-slate-300 rounded-2xl p-10 text-center
+                    hover:border-blue-400 hover:bg-blue-50 transition-all cursor-pointer"
+             onclick="document.getElementById('fileInput').click()"
+             ondragover="event.preventDefault(); this.classList.add('border-blue-400','bg-blue-50')"
+             ondragleave="this.classList.remove('border-blue-400','bg-blue-50')"
+             ondrop="handleDrop(event)">
+          <div class="text-5xl mb-3">📊</div>
+          <p class="font-semibold text-slate-700 text-base">ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
+          <p class="text-slate-400 text-sm mt-1">รองรับ .xlsx และ .xls</p>
+          <div id="fileLabel" class="mt-3 text-blue-600 font-semibold text-sm hidden"></div>
+        </div>
+        <input type="file" name="file" id="fileInput" accept=".xlsx,.xls"
+               class="hidden" onchange="showFilename(this)"/>
+        <div class="flex justify-center mt-5">
+          <button type="submit" id="submitBtn" disabled
+                  class="bg-blue-600 text-white font-semibold px-8 py-2.5 rounded-xl text-sm
+                         hover:bg-blue-700 transition disabled:opacity-40 disabled:cursor-not-allowed
+                         flex items-center gap-2">
+            🔍 วิเคราะห์และดูตัวอย่าง
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Preview table -->
+  {% if preview %}
+  <div x-data="{ mode: 'new_only' }">
+
+    <!-- Stats bar -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+      <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
+        <div class="text-2xl font-bold text-emerald-600">{{ stats.new }}</div>
+        <div class="text-xs text-slate-500 font-semibold mt-1">✅ เพิ่มใหม่</div>
+      </div>
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+        <div class="text-2xl font-bold text-amber-600">{{ stats.duplicate_iccid }}</div>
+        <div class="text-xs text-slate-500 font-semibold mt-1">🔄 ซ้ำ ICCID</div>
+      </div>
+      <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 text-center">
+        <div class="text-2xl font-bold text-orange-500">{{ stats.duplicate_phone }}</div>
+        <div class="text-xs text-slate-500 font-semibold mt-1">📞 ซ้ำเบอร์</div>
+      </div>
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
+        <div class="text-2xl font-bold text-slate-400">{{ stats.skip }}</div>
+        <div class="text-xs text-slate-500 font-semibold mt-1">⏭️ ข้าม</div>
+      </div>
+    </div>
+
+    <!-- Mode selector + confirm -->
+    <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+      <div class="flex-1">
+        <p class="font-semibold text-slate-700 text-sm mb-2">⚙️ เลือกโหมด Import:</p>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="mode_select" value="new_only" checked
+                   @change="mode='new_only'" class="text-blue-600"/>
+            <span class="text-sm">
+              <strong class="text-slate-800">เพิ่มเฉพาะรายการใหม่</strong>
+              <span class="text-slate-500 text-xs block">ข้ามรายการที่ซ้ำ ICCID (แนะนำ)</span>
+            </span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="mode_select" value="overwrite_all"
+                   @change="mode='overwrite_all'" class="text-amber-600"/>
+            <span class="text-sm">
+              <strong class="text-slate-800">เพิ่มใหม่ + อัปเดตรายการซ้ำ</strong>
+              <span class="text-slate-500 text-xs block">Overwrite ข้อมูลเดิมที่มี ICCID ตรงกัน</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <form method="post" action="/import/confirm" class="flex-shrink-0">
+        <input type="hidden" name="mode" :value="mode"/>
+        <input type="hidden" name="token" value="{{ token or '' }}"/>
+        <button type="submit"
+                class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition flex items-center gap-2">
+          ✅ ยืนยัน Import
+          <span class="bg-white/20 px-2 py-0.5 rounded-lg text-xs">{{ stats.new }} รายการ</span>
+        </button>
+      </form>
+
+      <a href="/import" class="text-sm text-slate-500 hover:text-slate-800 font-semibold flex-shrink-0">✕ ยกเลิก</a>
+    </div>
+
+    <!-- Legend -->
+    <div class="flex gap-3 flex-wrap text-xs mb-3">
+      <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-400 inline-block"></span>เพิ่มใหม่</span>
+      <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-400 inline-block"></span>ซ้ำ ICCID</span>
+      <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-orange-400 inline-block"></span>ซ้ำเบอร์</span>
+      <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-slate-300 inline-block"></span>ข้าม (ไม่มีเบอร์)</span>
+    </div>
+
+    <!-- Preview table -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs">
+          <thead class="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th class="px-3 py-2.5 text-left text-slate-500 font-bold uppercase tracking-wide">#</th>
+              <th class="px-3 py-2.5 text-left text-slate-500 font-bold uppercase tracking-wide">สถานะ</th>
+              <th class="px-3 py-2.5 text-left text-slate-500 font-bold uppercase tracking-wide">ICCID / S/N</th>
+              <th class="px-3 py-2.5 text-left text-slate-500 font-bold uppercase tracking-wide">เบอร์โทร</th>
+              <th class="px-3 py-2.5 text-left text-slate-500 font-bold uppercase tracking-wide">ผู้ให้บริการ</th>
+              <th class="px-3 py-2.5 text-left text-slate-500 font-bold uppercase tracking-wide">แผนก</th>
+              <th class="px-3 py-2.5 text-left text-slate-500 font-bold uppercase tracking-wide">ผู้ใช้งาน</th>
+              <th class="px-3 py-2.5 text-left text-slate-500 font-bold uppercase tracking-wide">แพ็กเกจ</th>
+              <th class="px-3 py-2.5 text-left text-slate-500 font-bold uppercase tracking-wide">วันเปิดใช้</th>
+              <th class="px-3 py-2.5 text-left text-slate-500 font-bold uppercase tracking-wide">วันหมดอายุ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {% for row in preview %}
+            {% set bg = {
+              'new':              'bg-emerald-50',
+              'duplicate_iccid':  'bg-amber-50',
+              'duplicate_phone':  'bg-orange-50',
+              'skip':             'bg-slate-50 opacity-60',
+            }.get(row._status, '') %}
+            {% set badge_color = {
+              'new':              'bg-emerald-100 text-emerald-700',
+              'duplicate_iccid':  'bg-amber-100 text-amber-700',
+              'duplicate_phone':  'bg-orange-100 text-orange-700',
+              'skip':             'bg-slate-100 text-slate-500',
+            }.get(row._status, '') %}
+            {% set badge_label = {
+              'new':              '✅ ใหม่',
+              'duplicate_iccid':  '🔄 ซ้ำ ICCID',
+              'duplicate_phone':  '📞 ซ้ำเบอร์',
+              'skip':             '⏭️ ข้าม',
+            }.get(row._status, '') %}
+            <tr class="hover:brightness-95 transition {{ bg }}">
+              <td class="px-3 py-2 text-slate-400 font-mono">{{ row._row }}</td>
+              <td class="px-3 py-2">
+                <span class="px-2 py-0.5 rounded-full text-xs font-semibold {{ badge_color }}">
+                  {{ badge_label }}
+                </span>
+              </td>
+              <td class="px-3 py-2 font-mono text-slate-600">{{ row.iccid }}</td>
+              <td class="px-3 py-2 font-semibold text-slate-800">
+                {{ row.phone_number }}
+                {% if row._raw_number and row._raw_number != row.phone_number %}
+                <div class="text-slate-400 font-normal text-xs">{{ row._raw_number[:30] }}</div>
+                {% endif %}
+              </td>
+              <td class="px-3 py-2">
+                <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-semibold">{{ row.carrier }}</span>
+              </td>
+              <td class="px-3 py-2 text-slate-600">{{ row.department }}</td>
+              <td class="px-3 py-2 text-slate-600">{{ row.assigned_to }}</td>
+              <td class="px-3 py-2 text-slate-500 max-w-xs truncate">{{ row.plan }}</td>
+              <td class="px-3 py-2 text-slate-600">
+                {{ row.activation_date or '' }}
+                {% if row._raw_start %}
+                <div class="text-slate-400 text-xs">{{ row._raw_start[:20] }}</div>
+                {% endif %}
+              </td>
+              <td class="px-3 py-2 text-slate-600">
+                {{ row.expiry_date or '' }}
+                {% if row._raw_exp %}
+                <div class="text-slate-400 text-xs">{{ row._raw_exp[:20] }}</div>
+                {% endif %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showFilename(input) {
+  const label = document.getElementById('fileLabel');
+  const btn   = document.getElementById('submitBtn');
+  if (input.files && input.files[0]) {
+    label.textContent = '📁 ' + input.files[0].name;
+    label.classList.remove('hidden');
+    btn.disabled = false;
+  }
+}
+function handleDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('border-blue-400','bg-blue-50');
+  const dt = e.dataTransfer;
+  if (dt.files && dt.files[0]) {
+    const inp = document.getElementById('fileInput');
+    inp.files = dt.files;
+    showFilename(inp);
+  }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% block title %}จัดการ SIM Card{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">📱 จัดการ SIM Card</h1>
+      <p class="text-slate-500 text-sm mt-0.5">ทั้งหมด {{ total_count }} รายการ</p>
+    </div>
+    <a href="/simcards/new"
+       class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition">
+      <span>+</span> เพิ่ม SIM ใหม่
+    </a>
+  </div>
+
+  <!-- Filter bar -->
+  <form method="get" class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+    <input type="hidden" name="sort"  value="{{ sort }}"/>
+    <input type="hidden" name="order" value="{{ order }}"/>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="col-span-2 md:col-span-1">
+        <input type="text" name="q" value="{{ q }}" placeholder="🔍 ค้นหา ICCID, เบอร์, ชื่อ..."
+               class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+      </div>
+      <select name="status" class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="">สถานะทั้งหมด</option>
+        {% for s in statuses %}<option value="{{ s }}" {% if status==s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+      </select>
+      <select name="carrier" class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="">ผู้ให้บริการทั้งหมด</option>
+        {% for c in all_carriers %}<option value="{{ c }}" {% if carrier==c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+      </select>
+      <div class="flex gap-2">
+        <select name="department" class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">แผนกทั้งหมด</option>
+          {% for d in all_departments %}<option value="{{ d }}" {% if department==d %}selected{% endif %}>{{ d }}</option>{% endfor %}
+        </select>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">ค้นหา</button>
+        <a href="/simcards" class="border border-slate-200 text-slate-600 px-3 py-2 rounded-lg text-sm hover:bg-slate-50 transition">✕</a>
+      </div>
+    </div>
+  </form>
+
+  <!-- Export buttons -->
+  <div class="flex gap-2 flex-wrap">
+    <a href="/export/csv{% if status or carrier or department %}?status={{ status }}&carrier={{ carrier }}&department={{ department }}{% endif %}"
+       class="text-xs bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition">
+      📄 Export CSV
+    </a>
+    <a href="/export/excel{% if status or carrier or department %}?status={{ status }}&carrier={{ carrier }}&department={{ department }}{% endif %}"
+       class="text-xs bg-blue-50 border border-blue-200 text-blue-700 font-semibold px-3 py-1.5 rounded-lg hover:bg-blue-100 transition">
+      📊 Export Excel
+    </a>
+    <!-- Legend วันคงเหลือ -->
+    <div class="flex items-center gap-2 ml-auto text-xs text-slate-400">
+      <span class="inline-flex items-center gap-1">
+        <span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:inline-block;"></span>≤15 วัน
+      </span>
+      <span class="inline-flex items-center gap-1">
+        <span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block;"></span>≤30 วัน
+      </span>
+      <span class="inline-flex items-center gap-1">
+        <span style="width:10px;height:10px;border-radius:50%;background:#10b981;display:inline-block;"></span>&gt;30 วัน
+      </span>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 border-b border-slate-200">
+          <tr>
+            {# Macro for sortable header #}
+            {% macro sort_th(label, field, extra_class='') %}
+            {% set next_order = 'asc' if (sort == field and order == 'desc') else 'desc' %}
+            {% set is_active  = sort == field %}
+            <th class="px-4 py-3 text-xs uppercase tracking-wide {{ extra_class }}">
+              <a href="?q={{ q }}&status={{ status }}&carrier={{ carrier }}&department={{ department }}&sort={{ field }}&order={{ next_order }}&page=1"
+                 class="flex items-center gap-1 font-semibold whitespace-nowrap
+                        {{ 'text-blue-600' if is_active else 'text-slate-500' }} hover:text-blue-600 transition select-none">
+                {{ label }}
+                {% if is_active %}
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+                    {% if order == 'asc' %}
+                    <path d="M5 2l4 6H1z"/>
+                    {% else %}
+                    <path d="M5 8L1 2h8z"/>
+                    {% endif %}
+                  </svg>
+                {% else %}
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" style="opacity:0.3">
+                    <path d="M5 1l3 4H2zM5 9L2 5h6z"/>
+                  </svg>
+                {% endif %}
+              </a>
+            </th>
+            {% endmacro %}
+
+            {{ sort_th('ICCID',        'iccid',           'text-left') }}
+            {{ sort_th('เบอร์โทร',    'phone_number',    'text-left') }}
+            {{ sort_th('ผู้ให้บริการ','carrier',          'text-left hidden md:table-cell') }}
+            {{ sort_th('ผู้ใช้ / แผนก','assigned_to',    'text-left hidden lg:table-cell') }}
+            {{ sort_th('สถานะ',        'status',           'text-left') }}
+            {{ sort_th('วันหมดอายุ',  'expiry_date',      'text-left hidden lg:table-cell') }}
+            <th class="px-4 py-3 text-xs uppercase tracking-wide text-center">
+              <span class="font-semibold text-slate-500 whitespace-nowrap">วันคงเหลือ</span>
+            </th>
+            {{ sort_th('ค่าบริการ',   'monthly_cost',     'text-right hidden md:table-cell') }}
+            <th class="px-4 py-3 text-xs uppercase tracking-wide text-center text-slate-500 font-semibold">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {% if sims %}
+            {% for sim in sims %}
+            {# Compute days remaining #}
+            {% set days = sim.days_until_expiry %}
+
+            <tr class="hover:bg-slate-50">
+              <td class="px-4 py-3 font-mono text-xs text-slate-500 max-w-xs truncate">{{ sim.iccid }}</td>
+              <td class="px-4 py-3 font-semibold text-slate-800 whitespace-nowrap">{{ sim.phone_number }}</td>
+              <td class="px-4 py-3 text-slate-600 hidden md:table-cell whitespace-nowrap">{{ sim.carrier }}</td>
+              <td class="px-4 py-3 hidden lg:table-cell">
+                <div class="text-slate-700 text-xs font-medium">{{ sim.assigned_to or '—' }}</div>
+                <div class="text-slate-400 text-xs">{{ sim.department or '' }}</div>
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap">
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-full status-{{ sim.status }}">{{ sim.status }}</span>
+              </td>
+              <td class="px-4 py-3 hidden lg:table-cell whitespace-nowrap">
+                {% if sim.expiry_date %}
+                  <div class="text-xs text-slate-600">{{ sim.expiry_date }}</div>
+                {% else %}
+                  <span class="text-slate-300 text-xs">—</span>
+                {% endif %}
+              </td>
+
+              {# วันคงเหลือ — color-coded badge #}
+              <td class="px-4 py-3 text-center whitespace-nowrap">
+                {% if days is none %}
+                  <span class="text-slate-300 text-xs">—</span>
+                {% elif days < 0 %}
+                  <span style="display:inline-flex;align-items:center;gap:4px;background:#fee2e2;color:#b91c1c;border-radius:99px;padding:2px 10px;font-size:11px;font-weight:700;">
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>
+                    หมดแล้ว
+                  </span>
+                {% elif days <= 15 %}
+                  <span style="display:inline-flex;align-items:center;gap:4px;background:#fee2e2;color:#dc2626;border-radius:99px;padding:2px 10px;font-size:11px;font-weight:700;">
+                    <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
+                    {{ days }} วัน
+                  </span>
+                {% elif days <= 30 %}
+                  <span style="display:inline-flex;align-items:center;gap:4px;background:#fef3c7;color:#d97706;border-radius:99px;padding:2px 10px;font-size:11px;font-weight:700;">
+                    <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
+                    {{ days }} วัน
+                  </span>
+                {% else %}
+                  <span style="display:inline-flex;align-items:center;gap:4px;background:#d1fae5;color:#059669;border-radius:99px;padding:2px 10px;font-size:11px;font-weight:700;">
+                    <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
+                    {{ days }} วัน
+                  </span>
+                {% endif %}
+              </td>
+
+              <td class="px-4 py-3 text-right text-slate-600 hidden md:table-cell whitespace-nowrap">
+                {{ "{:,.0f}".format(sim.monthly_cost|float) }} ฿
+              </td>
+              <td class="px-4 py-3">
+                <div class="flex items-center justify-center gap-1">
+                  <a href="/simcards/{{ sim.id }}/edit"
+                     class="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded text-xs font-semibold transition">แก้ไข</a>
+                  <a href="/simcards/{{ sim.id }}/qr" target="_blank"
+                     class="text-slate-500 hover:bg-slate-100 px-2 py-1 rounded text-xs font-semibold transition">QR</a>
+                  <form method="post" action="/simcards/{{ sim.id }}/delete"
+                        onsubmit="return confirm('ยืนยันลบ SIM {{ sim.phone_number }}?')">
+                    <button type="submit"
+                            class="text-red-500 hover:bg-red-50 px-2 py-1 rounded text-xs font-semibold transition">ลบ</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="9" class="text-center py-16 text-slate-400">
+                <div class="text-4xl mb-3">📭</div>
+                <div class="font-medium">ไม่พบข้อมูล SIM Card</div>
+                <div class="text-sm mt-1">
+                  <a href="/simcards/new" class="text-blue-600 hover:underline">เพิ่ม SIM ใหม่</a>
+                </div>
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="px-4 py-3 border-t border-slate-100 flex items-center justify-between text-sm">
+      <span class="text-slate-400 text-xs">หน้า {{ page }} / {{ total_pages }} ({{ total_count }} รายการ)</span>
+      <div class="flex gap-1">
+        {% if page > 1 %}
+        <a href="?q={{ q }}&status={{ status }}&carrier={{ carrier }}&department={{ department }}&sort={{ sort }}&order={{ order }}&page={{ page - 1 }}"
+           class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 text-xs">← ก่อนหน้า</a>
+        {% endif %}
+        {% if page < total_pages %}
+        <a href="?q={{ q }}&status={{ status }}&carrier={{ carrier }}&department={{ department }}&sort={{ sort }}&order={{ order }}&page={{ page + 1 }}"
+           class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 text-xs">ถัดไป →</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
